@@ -10,7 +10,7 @@ The script contains a set of utilities for managing JMS queues on the Weblogic S
     [5] Delete queues. Input: List of space separated queue names.
     [6] Move messages from one queue (e.g. DMQ) to another.
     [7] Get the queue information:  Queue name, Messages Current Count, Messages Received Count as well as some basic
-        information about queues first and last messages (size, timestamp, etc)
+        information about the first and the last message on the queue (size, timestamp, etc)
 
 ## Usage:
 1. Execute: wlst manageJmsQueues.py -loadProperties manageJmsQueues.properties
