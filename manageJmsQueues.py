@@ -16,7 +16,6 @@ Usage:
 import sys, os
 import random
 import os.path
-import time
 from time import gmtime, strftime, localtime
 from weblogic.jms.extensions import JMSMessageInfo
 from javax.jms import TextMessage
@@ -30,28 +29,30 @@ def list_queues_without_listeners():
     """
     try:
         servers = domainRuntimeService.getServerRuntimes()
-        if len(servers) > 0:
-            report = []
-            for server in servers:
-                log("INFO", "Searching queues on server " + server.name + "...")
-                jms_runtime = server.getJMSRuntime()
-                jms_servers = jms_runtime.getJMSServers()
-                for jms_server in jms_servers:
-                    destinations = jms_server.getDestinations()
-                    for dest in destinations:
-                        cons_cur_cnt = dest.consumersCurrentCount  # Current Consumer Count
-                        name = dest.name  # Queue name
-                        if cons_cur_cnt == 0 and "_dmq" not in name:  # Do not check DMQ queues
-                            msg_cur_cnt = dest.messagesCurrentCount  # Current Messages Count
-                            report.append([name, cons_cur_cnt, msg_cur_cnt])
-            # Create report
-            report_title = "REPORT: LIST QUEUES WITHOUT LISTENERS, " + url + ", " + cur_dt()
-            col_names = ("QUEUE_NAME", "CUR_CONS#", "CUR_MSG#")
-            create_report(report_title, report, col_names, is_sorted=True)
-            f.write("\n")
-        else:    
+        if len(servers) == 0:
             log("WARNING", "No servers were found at " + url + ". Terminating the script...")
+            return
+
+        report = []
+        for server in servers:
+            log("INFO", "Searching queues on server " + server.name + "...")
+            jms_runtime = server.getJMSRuntime()
+            jms_servers = jms_runtime.getJMSServers()
+            for jms_server in jms_servers:
+                destinations = jms_server.getDestinations()
+                for dest in destinations:
+                    cons_cur_cnt = dest.consumersCurrentCount  # Current Consumer Count
+                    name = dest.name  # Queue name
+                    if cons_cur_cnt == 0 and "_dmq" not in name:  # Do not check DMQ queues
+                        msg_cur_cnt = dest.messagesCurrentCount  # Current Messages Count
+                        report.append([name, cons_cur_cnt, msg_cur_cnt])
+        # Create report
+        report_title = "REPORT: LIST QUEUES WITHOUT LISTENERS, " + url + ", " + cur_dt()
+        col_names = ("QUEUE_NAME", "CUR_CONS#", "CUR_MSG#")
+        create_report(report_title, report, col_names, is_sorted=True)
+        f.write("\n")
         log("INFO", "list_queues_without_listeners completed.")
+
     except (WLSTException, ValueError, NameError, Exception), e:
        log("ERROR", str(e))
 
@@ -64,28 +65,30 @@ def list_all_queues_with_current_messages():
     """
     try:
         servers = domainRuntimeService.getServerRuntimes()
-        if len(servers) > 0:
-            report = []
-            for server in servers:
-                log("INFO", "Searching queues on server " + server.name + "...")
-                jms_runtime = server.getJMSRuntime()
-                jms_servers = jms_runtime.getJMSServers()
-                for jms_server in jms_servers:
-                    destinations = jms_server.getDestinations()
-                    for dest in destinations:
-                        name = dest.name
-                        msg_cur_cnt = dest.messagesCurrentCount
-                        if msg_cur_cnt > 0:
-                            cons_cur_cnt = dest.consumersCurrentCount
-                            report.append([name, cons_cur_cnt, msg_cur_cnt])
-            # Create report
-            report_title = "REPORT: LIST OF QUEUES WITH CURRENT MESSAGES, " + str(url) + ", " + cur_dt()
-            col_names = ("QUEUE_NAME", "CUR_CONS#", "CUR_MSG#")
-            create_report(report_title, report, col_names, is_sorted=True)
-            f.write("\n")
-        else:    
+        if len(servers) == 0:
             log("WARNING", "No servers were found at " + url + ". Terminating the script...")
+            return
+
+        report = []
+        for server in servers:
+            log("INFO", "Searching queues on server " + server.name + "...")
+            jms_runtime = server.getJMSRuntime()
+            jms_servers = jms_runtime.getJMSServers()
+            for jms_server in jms_servers:
+                destinations = jms_server.getDestinations()
+                for dest in destinations:
+                    name = dest.name
+                    msg_cur_cnt = dest.messagesCurrentCount
+                    if msg_cur_cnt > 0:
+                        cons_cur_cnt = dest.consumersCurrentCount
+                        report.append([name, cons_cur_cnt, msg_cur_cnt])
+        # Create report
+        report_title = "REPORT: LIST OF QUEUES WITH CURRENT MESSAGES, " + str(url) + ", " + cur_dt()
+        col_names = ("QUEUE_NAME", "CUR_CONS#", "CUR_MSG#")
+        create_report(report_title, report, col_names, is_sorted=True)
+        f.write("\n")
         log("INFO", "list_all_queues_with_current_messages completed.")
+
     except (WLSTException, ValueError, NameError, Exception), e:
         log("ERROR", str(e))
 
@@ -98,27 +101,29 @@ def list_dmq_queues_with_current_messages():
     """
     try:
         servers = domainRuntimeService.getServerRuntimes()
-        if len(servers) > 0:
-            report = []
-            for server in servers:
-                log("INFO", "Searching queues on server " + server.name + "...")
-                jms_runtime = server.getJMSRuntime()
-                jms_servers = jms_runtime.getJMSServers()
-                for jms_server in jms_servers:
-                    destinations = jms_server.getDestinations()
-                    for dest in destinations:
-                        name = dest.name
-                        msg_cur_cnt = dest.messagesCurrentCount
-                        if msg_cur_cnt > 0 and "_dmq" in name:
-                            report.append([name, str(msg_cur_cnt)])
-            # Create report
-            report_title = "REPORT: LIST DMQ QUEUES WITH CURRENT MESSAGES, " + url + ", " + cur_dt()
-            col_names = ("QUEUE_NAME", "CUR_MSG#")
-            create_report(report_title, report, col_names, is_sorted=True)
-            f.write("\n")
-        else:    
+        if len(servers) == 0:
             log("WARNING", "No servers were found at " + url + ". Terminating the script...")
+            return
+
+        report = []
+        for server in servers:
+            log("INFO", "Searching queues on server " + server.name + "...")
+            jms_runtime = server.getJMSRuntime()
+            jms_servers = jms_runtime.getJMSServers()
+            for jms_server in jms_servers:
+                destinations = jms_server.getDestinations()
+                for dest in destinations:
+                    name = dest.name
+                    msg_cur_cnt = dest.messagesCurrentCount
+                    if msg_cur_cnt > 0 and "_dmq" in name:
+                        report.append([name, str(msg_cur_cnt)])
+        # Create report
+        report_title = "REPORT: LIST DMQ QUEUES WITH CURRENT MESSAGES, " + url + ", " + cur_dt()
+        col_names = ("QUEUE_NAME", "CUR_MSG#")
+        create_report(report_title, report, col_names, is_sorted=True)
+        f.write("\n")
         log("INFO", "list_dmq_queues_with_current_messages completed.")
+
     except (WLSTException, ValueError, NameError, Exception), e:
         log("ERROR", str(e))
 
@@ -137,41 +142,43 @@ def delete_messages_from_queue():
     try:
         queue_name = queue_name.strip()
         servers = domainRuntimeService.getServerRuntimes()
-        if len(servers) > 0:
-            for server in servers:
-                log("INFO", "Searching queues on server " + server.name + "...")
-                jms_runtime = server.getJMSRuntime()
-                jms_servers = jms_runtime.getJMSServers()
-                for jms_server in jms_servers:
-                    destinations = jms_server.getDestinations()
-                    for dest in destinations:
-                        name = get_queue_name(dest.name)
-                        if queue_name == name:
-                            msg_cur_cnt = dest.messagesCurrentCount
-                            cons_cur_cnt = dest.consumersCurrentCount
-                            print(cur_dt() + " [INFO] =====================")
-                            log("INFO", "Name: " + str(name) + ", Current consumers: " + str(cons_cur_cnt)
-                                + ", Current messages: " + str(msg_cur_cnt))
-                            if msg_cur_cnt > 0:
-                                del_msgs_choice = raw_input("[INPUT] Do you want to delete messages from this queue, Y/N [N]? ")
-                                print("")
-                                if del_msgs_choice.upper() == "Y":
-                                    log("INFO", "Deleting " + str(msg_cur_cnt) + " messages...")
-                                    dest.deleteMessages("")
-                                    # Check current messages after delete
-                                    msg_cur_cnt_new = dest.consumersCurrentCount
-                                    if msg_cur_cnt_new == 0:
-                                        log("INFO", "Successfully deleted " + str(msg_cur_cnt) + " messages")
-                                    else:
-                                        log("WARNING", "Deleted " + str(msg_cur_cnt - msg_cur_cnt_new) + " of "
-                                            + str(msg_cur_cnt) + " messages. Repeat the procedure to delete the rest.")
-                                else:
-                                    log("INFO", "Skipping as per user prompt...")
-                            else:
-                                log("INFO", "The queue is empty. Skipping...")
-        else:
+        if len(servers) == 0:
             log("WARNING", "No servers were found at " + url + ". Terminating the script...")
+            return
+
+        for server in servers:
+            log("INFO", "Searching queues on server " + server.name + "...")
+            jms_runtime = server.getJMSRuntime()
+            jms_servers = jms_runtime.getJMSServers()
+            for jms_server in jms_servers:
+                destinations = jms_server.getDestinations()
+                for dest in destinations:
+                    name = get_queue_name(dest.name)
+                    if queue_name == name:
+                        msg_cur_cnt = dest.messagesCurrentCount
+                        cons_cur_cnt = dest.consumersCurrentCount
+                        print(cur_dt() + " [INFO] =====================")
+                        log("INFO", "Name: " + str(name) + ", Current consumers: " + str(cons_cur_cnt)
+                            + ", Current messages: " + str(msg_cur_cnt))
+                        if msg_cur_cnt > 0:
+                            del_msgs_choice = raw_input("[INPUT] Do you want to delete messages from this queue, Y/N [N]? ")
+                            print("")
+                            if del_msgs_choice.upper() == "Y":
+                                log("INFO", "Deleting " + str(msg_cur_cnt) + " messages...")
+                                dest.deleteMessages("")
+                                # Check current messages after delete
+                                msg_cur_cnt_new = dest.consumersCurrentCount
+                                if msg_cur_cnt_new == 0:
+                                    log("INFO", "Successfully deleted " + str(msg_cur_cnt) + " messages")
+                                else:
+                                    log("WARNING", "Deleted " + str(msg_cur_cnt - msg_cur_cnt_new) + " of "
+                                        + str(msg_cur_cnt) + " messages. Repeat the procedure to delete the rest.")
+                            else:
+                                log("INFO", "Skipping as per user prompt...")
+                        else:
+                            log("INFO", "The queue is empty. Skipping...")
         log("INFO", "delete_messages_from_queue completed.")
+
     except (WLSTException, ValueError, NameError, Exception), e:
         log("ERROR", str(e))
 
@@ -318,64 +325,66 @@ def move_messages():
         print("")
         
         servers = domainRuntimeService.getServerRuntimes()
-        if len(servers) > 0:
-            report = []
-            q_beans_list = []
-            for server in servers:
-                q_src_found = False
-                q_trg_found = False
-                log("INFO", "Processing server: " + server.name + "...") 
-                jms_runtime = server.getJMSRuntime()
-                jms_servers = jms_runtime.getJMSServers()
-                for jms_server in jms_servers:
-                    print(cur_dt() + "[INFO] Processing JMS Server: " + jms_server.name + "...")
-                    destinations = jms_server.getDestinations()
-                    for dest in destinations:
-                        queue_name = get_queue_name(dest.name)  # TODO: Should be a better way.
-                        if queue_name == q_src_name:
-                            log("INFO", "Queue found: " + dest.name)
-                            q_src_found = True
-                            q_src_bean = dest
-                            q_src_bean_msg_cur_cnt = q_src_bean.messagesCurrentCount
-                        if queue_name == q_trg_name:
-                            log("INFO", "Queue found: " + dest.name)
-                            q_trg_found = True
-                            q_trg_bean = dest
-                        if q_src_found and q_trg_found:
-                            break
-                    if q_src_found and q_trg_found:
-                        q_beans_list.append([q_src_bean, q_trg_bean, q_src_bean_msg_cur_cnt])
-                        report.append([server.name, jms_server.name, q_src_name, q_trg_name, q_src_bean_msg_cur_cnt])
-                        break  # go to next server
-            report_title = "REPORT: QUEUES FOUND FOR MOVE MESSAGES, " + url + ", " + cur_dt()
-            col_names = ("SERVER", "JMS SERVER", "SOURCE QUEUE", "TARGET QUEUE", "MESSAGES#")
-            create_report(report_title, report, col_names, is_sorted=True)
-            f.write("\n")
-
-            mv_msgs_choice = raw_input("[INPUT] Do you want to move messages from '" + q_src_name + "' to '"
-                                       + q_trg_name + "', Y/N [N]? ")
-            if mv_msgs_choice.upper() == "Y":
-                for row in q_beans_list:
-                    q_src_bean_msg_cur_cnt = row[2]
-                    if q_src_bean_msg_cur_cnt > 0:
-                        q_src_bean = row[0]
-                        q_trg_bean = row[1]
-                        log("INFO", "Moving " + str(q_src_bean_msg_cur_cnt) + " messages from '"
-                            + q_src_bean.name + "'...")
-                        q_src_bean.moveMessages("", q_trg_bean.getDestinationInfo())
-                        q_src_bean_msg_cur_cnt_new = q_src_bean.messagesCurrentCount
-                        log("INFO", "Current messages on '" + q_src_bean.name + "': " + str(q_src_bean_msg_cur_cnt_new))
-                        if q_src_bean_msg_cur_cnt_new == 0:
-                            log("INFO", "Successfully moved " + str(q_src_bean_msg_cur_cnt) + " messages to '"
-                                + q_trg_bean.name + "'.")
-                        else:
-                            log("WARNING", "There are still current messages on '" + q_trg_bean.name
-                                + "'. Repeat the procedure.")
-            else:
-                log("WARNING", "Operation canceled by the user.")
-        else:
+        if len(servers) == 0:
             log("WARNING", "No servers were found at " + url + ". Terminating the script...")
+            return
+
+        report = []
+        q_beans_list = []
+        for server in servers:
+            q_src_found = False
+            q_trg_found = False
+            log("INFO", "Processing server: " + server.name + "...")
+            jms_runtime = server.getJMSRuntime()
+            jms_servers = jms_runtime.getJMSServers()
+            for jms_server in jms_servers:
+                print(cur_dt() + "[INFO] Processing JMS Server: " + jms_server.name + "...")
+                destinations = jms_server.getDestinations()
+                for dest in destinations:
+                    queue_name = get_queue_name(dest.name)  # TODO: Should be a better way.
+                    if queue_name == q_src_name:
+                        log("INFO", "Queue found: " + dest.name)
+                        q_src_found = True
+                        q_src_bean = dest
+                        q_src_bean_msg_cur_cnt = q_src_bean.messagesCurrentCount
+                    if queue_name == q_trg_name:
+                        log("INFO", "Queue found: " + dest.name)
+                        q_trg_found = True
+                        q_trg_bean = dest
+                    if q_src_found and q_trg_found:
+                        break
+                if q_src_found and q_trg_found:
+                    q_beans_list.append([q_src_bean, q_trg_bean, q_src_bean_msg_cur_cnt])
+                    report.append([server.name, jms_server.name, q_src_name, q_trg_name, q_src_bean_msg_cur_cnt])
+                    break  # go to next server
+        report_title = "REPORT: QUEUES FOUND FOR MOVE MESSAGES, " + url + ", " + cur_dt()
+        col_names = ("SERVER", "JMS SERVER", "SOURCE QUEUE", "TARGET QUEUE", "MESSAGES#")
+        create_report(report_title, report, col_names, is_sorted=True)
+        f.write("\n")
+
+        mv_msgs_choice = raw_input("[INPUT] Do you want to move messages from '" + q_src_name + "' to '"
+                                   + q_trg_name + "', Y/N [N]? ")
+        if mv_msgs_choice.upper() == "Y":
+            for row in q_beans_list:
+                q_src_bean_msg_cur_cnt = row[2]
+                if q_src_bean_msg_cur_cnt > 0:
+                    q_src_bean = row[0]
+                    q_trg_bean = row[1]
+                    log("INFO", "Moving " + str(q_src_bean_msg_cur_cnt) + " messages from '"
+                        + q_src_bean.name + "'...")
+                    q_src_bean.moveMessages("", q_trg_bean.getDestinationInfo())
+                    q_src_bean_msg_cur_cnt_new = q_src_bean.messagesCurrentCount
+                    log("INFO", "Current messages on '" + q_src_bean.name + "': " + str(q_src_bean_msg_cur_cnt_new))
+                    if q_src_bean_msg_cur_cnt_new == 0:
+                        log("INFO", "Successfully moved " + str(q_src_bean_msg_cur_cnt) + " messages to '"
+                            + q_trg_bean.name + "'.")
+                    else:
+                        log("WARNING", "There are still current messages on '" + q_trg_bean.name
+                            + "'. Repeat the procedure.")
+        else:
+            log("WARNING", "Operation canceled by the user.")
         log("INFO", "move_messages completed.")
+
     except (ServiceUnavailableException, WLSTException, ValueError, NameError, Exception), e:
         log("ERROR", str(e))
         if report:
@@ -401,58 +410,59 @@ def get_queue_info():
         queue_name = queue_name.strip()
         log("INFO", "Entered queue name: " + queue_name)
         servers = domainRuntimeService.getServerRuntimes()
-        if len(servers) > 0:
-            col_names = ("PROPERTY", "VALUE")
-            for server in servers:
-                report = []
-                report_title = "REPORT: INFORMATION ON QUEUE " + queue_name + ", " + server.name + ", " + cur_dt()
-                log("INFO", "Searching for " + queue_name + "on server " + server.name + "...")
-                jms_runtime = server.getJMSRuntime()
-                jms_servers = jms_runtime.getJMSServers()
-                for jms_server in jms_servers:
-                    destinations = jms_server.getDestinations()
-                    for dest in destinations:
-                        name = get_queue_name(dest.name)
-                        if queue_name == name:
-                            report.append(("Queue name", name))
-                            report.append(("Queue full name", dest.name))
-                            report.append(("Messages Current Count", dest.messagesCurrentCount))
-                            report.append(("Messages Received Count", dest.messagesReceivedCount))
-                            report.append(("Messages Pending Count", dest.messagesPendingCount))
-                            report.append(("Messages High Count", dest.messagesHighCount))
-                            report.append(("Consumers Current Count", dest.consumersCurrentCount))
-
-                            if int(dest.messagesCurrentCount):
-                                # Get information about first and last messages
-                                cursor = dest.getMessages("", 0)
-                                cursor_size = dest.getCursorSize(cursor)
-                                messages = dest.getNext(cursor, cursor_size)
-                                if cursor_size > 1:
-                                    msg_indexes = [0, cursor_size - 1]
-                                else:
-                                    msg_indexes = [0]
-                                for i in msg_indexes:
-                                    message = messages[i]
-                                    jms_msg_info = JMSMessageInfo(message)
-                                    wlmsg = jms_msg_info.getMessage()
-                                    report.append(("", ""))
-                                    if i == 0:
-                                        report.append(("First message..........", ""))
-                                    else:
-                                        report.append(("Last message...........", ""))
-                                    report.append(("JMSMessageID", wlmsg.getJMSMessageID()))
-                                    loc_time = localtime(Double(wlmsg.getJMSTimestamp()//1000))
-                                    jms_timestamp = strftime('%Y-%m-%d %H:%M:%S', loc_time)
-                                    report.append(("JMSTimestamp", jms_timestamp))
-                                    report.append(("PayloadSize", wlmsg.getPayloadSize()))
-                                    report.append(("JMSExpiration", wlmsg.getJMSExpiration()))
-                                    report.append(("JMSRedelivered", wlmsg.getJMSRedelivered()))
-                                    report.append(("JMSRedeliveryLimit", wlmsg.getJMSRedeliveryLimit()))
-                                dest.closeCursor(cursor)
-                if report:
-                    create_report(report_title, report, col_names, is_sorted=False)
-        else:
+        if len(servers) == 0:
             log("WARNING", "No servers were found at " + url + ". Terminating the script...")
+            return
+
+        col_names = ("PROPERTY", "VALUE")
+        for server in servers:
+            report = []
+            report_title = "REPORT: INFORMATION ON QUEUE " + queue_name + ", " + server.name + ", " + cur_dt()
+            log("INFO", "Searching for " + queue_name + " on server " + server.name + "...")
+            jms_runtime = server.getJMSRuntime()
+            jms_servers = jms_runtime.getJMSServers()
+            for jms_server in jms_servers:
+                destinations = jms_server.getDestinations()
+                for dest in destinations:
+                    name = get_queue_name(dest.name)
+                    if queue_name == name:
+                        report.append(("Queue name", name))
+                        report.append(("Queue full name", dest.name))
+                        report.append(("Messages Current Count", dest.messagesCurrentCount))
+                        report.append(("Messages Received Count", dest.messagesReceivedCount))
+                        report.append(("Messages Pending Count", dest.messagesPendingCount))
+                        report.append(("Messages High Count", dest.messagesHighCount))
+                        report.append(("Consumers Current Count", dest.consumersCurrentCount))
+
+                        if int(dest.messagesCurrentCount):
+                            # Get information about first and last messages
+                            cursor = dest.getMessages("", 0)
+                            cursor_size = dest.getCursorSize(cursor)
+                            messages = dest.getNext(cursor, cursor_size)
+                            if cursor_size > 1:
+                                msg_indexes = [0, cursor_size - 1]
+                            else:
+                                msg_indexes = [0]
+                            for i in msg_indexes:
+                                message = messages[i]
+                                jms_msg_info = JMSMessageInfo(message)
+                                wlmsg = jms_msg_info.getMessage()
+                                report.append(("", ""))
+                                if i == 0:
+                                    report.append(("First message..........", ""))
+                                else:
+                                    report.append(("Last message...........", ""))
+                                report.append(("JMSMessageID", wlmsg.getJMSMessageID()))
+                                loc_time = localtime(Double(wlmsg.getJMSTimestamp()//1000))
+                                jms_timestamp = strftime('%Y-%m-%d %H:%M:%S', loc_time)
+                                report.append(("JMSTimestamp", jms_timestamp))
+                                report.append(("PayloadSize", wlmsg.getPayloadSize()))
+                                report.append(("JMSExpiration", wlmsg.getJMSExpiration()))
+                                report.append(("JMSRedelivered", wlmsg.getJMSRedelivered()))
+                                report.append(("JMSRedeliveryLimit", wlmsg.getJMSRedeliveryLimit()))
+                            dest.closeCursor(cursor)
+            if report:
+                create_report(report_title, report, col_names, is_sorted=False)
         log("INFO", "get_queue_info completed.")
     
     except (WLSTException, ValueError, NameError, Exception, AttributeError, TypeError), e:
@@ -551,16 +561,19 @@ def start_connect(function_name, is_connected):
     :type is_connected: bool. Connection status: True - connected, False otherwise
     :rtype: bool
     """
-    log("INFO", "======================================================================")
-    log("INFO", "Starting " + function_name + "...")
-    if not is_connected:
-        log("INFO", "Connecting to " + url + " as " + usrname + "...")
-        connect(usrname, password, url)
-        print("")
-        log("INFO", "Connected to " + url + " as " + usrname + ".")
-    is_connected = True
-    return is_connected
-
+    try:
+        log("INFO", "======================================================================")
+        log("INFO", "Starting " + function_name + "...")
+        if not is_connected:
+            log("INFO", "Connecting to " + url + " as " + usrname + "...")
+            connect(usrname, password, url)
+            print("")
+            log("INFO", "Connected to " + url + " as " + usrname + ".")
+        is_connected = True
+        return is_connected
+    
+    except (WLSTException, ValueError, NameError, Exception, AttributeError, TypeError), e:
+        log("ERROR", str(e))
 
 def get_queue_name(name):
     """
