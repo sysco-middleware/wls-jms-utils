@@ -13,11 +13,11 @@ The script contains a set of utilities for managing JMS queues on the Weblogic S
     [7] Move messages from one queue (e.g. DMQ) to another.
     [8] Get the queue information:  Queue name, Messages Current Count, Messages Received Count as well as some basic
         information about the queue's first and last messages (size, timestamp, etc)
-Examples of message filters that can be used for deleting or moving a set of messages: 
-        1. JMS_BEA_State LIKE 'expired' - remove all messages with state 'expired'
-        2. JMSTimestamp > '2018-05-03 17:47:53.728' - all messages older than 2018-05-03T17:47:53.728
-        3. JMSXDeliveryCount > 0 - all messages that were redelivered at least once
-        4. JMSType = 'car' AND weight > 2500 - messages with a message type of car and weight greater than 2500
+Examples of message filters that can be used for deleting or moving a set of messages:
+1. JMS_BEA_State LIKE 'expired' - remove all messages with state 'expired'
+2. JMSTimestamp > '2018-05-03 17:47:53.728' - all messages older than 2018-05-03T17:47:53.728
+3. JMSXDeliveryCount > 0 - all messages that were redelivered at least once
+4. JMSType = 'car' AND weight > 2500 - messages with a message type of car and weight greater than 2500
 See here for more examples of message selectors: https://docs.oracle.com/javaee/6/api/javax/jms/Message.html
 
 ## Manual usage:
