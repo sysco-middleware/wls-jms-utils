@@ -54,7 +54,14 @@ def main():
     is_connected = False
     connection_info = {"is_connected": is_connected, "env": env, "url": url, "username": username, "password": password}
     # Chose environment and make a connection to it
-    connection_info = connect_wls(connection_info)
+    while not connection_info["is_connected"]:
+        connection_info = connect_wls(connection_info)
+        if is_standalone and not is_connected:
+            f.close()
+            disconnect()
+            exit()
+        elif not is_connected:
+            connection_info["env"] = ""
 
     while keep_main_loop:
 
@@ -90,7 +97,7 @@ def main():
         try:
             if procedure == "0":
                 connection_info["env"] = ""
-                connect_wls(connection_info)
+                connection_info = connect_wls(connection_info)
             elif procedure == "1" or procedure == "list_all_queues":
                 connection_info = start_connect(
                     "list_all_queues", connection_info)
@@ -110,7 +117,7 @@ def main():
             elif procedure == "5" or procedure == "delete_messages_from_queue":
                 connection_info = start_connect(
                     "delete_messages_from_queue", connection_info)
-                delete_messages_from_queue()
+                delete_messages_from_queue(connection_info)
             elif procedure == "6" or procedure == "delete_queues":
                 connection_info = start_connect("delete_queues", connection_info)
                 delete_queues(connection_info)
@@ -123,10 +130,9 @@ def main():
             elif procedure == "9":
                 break
             else:
-                log("ERROR", "Unknown procedure: " + procedure)
-                break
-        except (WLSTException, ValueError, NameError, Exception, AttributeError, EOFError), e:
-            log("ERROR", str(e))
+                log("ERROR", "Unknown procedure number: " + procedure + ". Try again.")
+        except:
+            log("ERROR", str(sys.exc_info()[0]) + " " + str(sys.exc_info()[1]))
             disconnect()
             is_connected = False
             connection_info["is_connected"] = is_connected
@@ -293,7 +299,7 @@ def list_dmq_queues_with_current_messages(connection_info):
         log("ERROR", str(e))
 
 
-def delete_messages_from_queue():
+def delete_messages_from_queue(connection_info):
     """
     This function deletes all messages from a given queue.
     Automatic usage:
@@ -338,7 +344,7 @@ def delete_messages_from_queue():
         servers = domainRuntimeService.getServerRuntimes()
         if len(servers) == 0:
             log("ERROR", "No servers were found at " +
-                parse_url(url)["hostname"] + ". Terminating the script...")
+                parse_url(connection_info["url"])["hostname"] + ". Terminating the script...")
             return
 
         is_dest_found = False
@@ -1018,17 +1024,17 @@ def connect_wls(connection_info):
         print("")
 
         while True:
-            env = raw_input("[INPUT] Choose one environment from the list above: ")
+            env = raw_input("[INPUT] Choose an environment from the list above: ")
             if env in prop_env_file:
                 break
             else:
                 print(cur_dt() + " [WARNING] The provided environment name is not found in the list. Try again.")
 
-    # Check the env provided when starting the script automatically
+    # Check that env was provided when starting the script as standalone
     if env in prop_env_file:
         prop_file_name = prop_env_file[env]
     else:
-        log("ERROR", "Property file for the environment " + env + " was not found ")
+        log("ERROR", "Property file for the environment " + env + " was not found.  ")
         f.close()
         exit()
 
@@ -1041,11 +1047,14 @@ def connect_wls(connection_info):
     password = prop_file.getProperty("password")
 
     log("INFO", "Trying to connect to " + url + " as " + username + "...")
-    connect(username, password, url)
-    # log("INFO", "Connected to " + url + " as " + username + ".")
-
-    is_connected = True
-    connection_info = {"is_connected": is_connected, "env": env, "url": url, "username": username, "password": password}
+    try:
+        connect(username, password, url)
+        is_connected = True
+        connection_info = {"is_connected": is_connected, "env": env, "url": url, "username": username, "password": password}
+    except:
+        log("ERROR", str(sys.exc_info()[0]) + " " + str(sys.exc_info()[1]))
+        is_connected = False
+        connection_info = {"is_connected": is_connected, "env": env, "url": url, "username": username, "password": password}
     return connection_info
 
 
