@@ -49,13 +49,14 @@ def main():
     The main function. Prompts to select an action and calls the corresponding function.
     Stays in the loop until the exit is selected by the user (for non-standalone calls).
     """
-
     keep_main_loop = True
     is_connected = False
     connection_info = {"is_connected": is_connected, "env": env, "url": url, "username": username, "password": password}
-    # Chose environment and make a connection to it
+    
+    # Choose and environment and make a connection to it
     while not connection_info["is_connected"]:
         connection_info = connect_wls(connection_info)
+        is_connected = connection_info["is_connected"]
         if is_standalone and not is_connected:
             f.close()
             disconnect()
@@ -75,8 +76,12 @@ def main():
                 exit()
             keep_main_loop = False
         else:
+            if connection_info["env"]:
+                cur_con_status = "currently connectred to " + connection_info["env"]
+            else:
+                cur_con_status = "currently not connected"
             print("")
-            print("[0] Change environment")
+            print("[0] Change environment (" + cur_con_status + ")")
             print("[1] List all queues")
             print("[2] List queues without listeners")
             print("[3] List all queues with current messages")
